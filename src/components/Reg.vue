@@ -1,14 +1,89 @@
 <template>
   <div class="wrapper">
-    <input type="text" placeholder="Login" class="login">
-    <input type="text" placeholder="Password" class="password">
-    <input type="text" placeholder="try password" class="tryPassword">
+    <input v-model="regData.login" type="text" placeholder="Login" class="login">
+    <input v-model="regData.password" type="text" placeholder="Password" class="password">
+    <input v-model="regData.tryPassword" type="text" placeholder="try password" class="tryPassword">
+    <button class="approve" v-on:click="registrationClickHandler">Зарегистрироваться</button>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Reg'
+  name: 'Reg',
+  data: () => ({
+    serverUrl: 'http://195.49.210.34/',
+    regData: {
+      login: '',
+      password: '',
+      tryPassword: ''
+    }
+  }),
+  methods: {
+    registrationClickHandler: async function () {
+      if (!this.regData.login || !this.regData.password || !this.regData.tryPassword) return alert('Поля не заполнены')
+
+      const request_body = {
+        userData: {
+          login: this.regData.login,
+          password: this.regData.password,
+          tryPassword: this.regData.tryPassword
+        }
+      }
+
+      const response = await this.sendRequest('user/registration', 'POST', request_body)
+
+      if (response.info.status === 'OK') {
+        this.$router.push({ name: 'Home', params: {id: response.payload._id} })
+      }
+      else {
+        alert(response.payload)
+      }
+
+      console.log({response})
+    },
+    sendRequest: async function (path, method, body) {
+      const url = `${this.serverUrl}${path}`
+      const request_config = {
+        method,
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: null
+      }
+
+      if (method !== 'GET') request_config.body = JSON.stringify(body)
+
+      const response = await fetch (url, request_config)
+
+      return await response.json()
+    }
+    // sendRequest: function (path, method, body) {
+    //   const request_config = {
+    //     method,
+    //     headers: {
+    //       'Content-Type': 'application/json;charset=utf-8'
+    //     },
+    //     body: null
+    //   }
+
+    //   if (method !== 'GET') request_config.body = JSON.stringify(body)
+    //   console.log(JSON.stringify(body))
+
+    //   fetch (`${this.serverUrl}${path}`, request_config)
+    //     .then (response => {
+    //        response.json()
+    //         .then(jsonRes => {
+    //           this.response = jsonRes
+    //         })
+    //         .catch (error => {
+    //           console.log({error})
+    //         })
+    //     })
+    //     .catch (error => {
+    //       console.log({error})
+    //     })
+    // }
+  }
 }
 </script>
 

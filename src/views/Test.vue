@@ -1,12 +1,15 @@
 <template>
   <div class="home">
-    Test
+    <ViewChat/>
   </div>
 </template>
 
 <script>
-
+import ViewChat from '@/components/chat/View.vue'
 export default {
-  name: 'Test'
+  name: 'Test',
+  components: {
+    ViewChat
+  }
 }
 </script>

@@ -2,26 +2,56 @@
   <div class="wrapper">
     <input v-model="authData.login" type="text" placeholder="Login" class="login">
     <input v-model="authData.password" type="text" placeholder="Password" class="password">
-    {{ authData.login  }}
-    {{ authData.password }}
     <button class="approve" v-on:click="buttonClickHandler">Войти</button>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'Auth',
+  name: 'Reg',
   data: () => ({
+    serverUrl: 'http://195.49.210.34/',
     authData: {
       login: '',
       password: ''
     }
   }),
   methods: {
-    buttonClickHandler: function () {
-      // this.$router.push({ name: 'test' })
+    buttonClickHandler: async function () {
+      if (!this.authData.login || !this.authData.password) return alert('Поля не заполнены')
 
-      if (!this.authData.login && !this.authData.password) alert('Ты дурак ?')
+      const request_body = {
+        userData: {
+          login: this.authData.login,
+          password: this.authData.password
+        }
+      }
+
+      const response = await this.sendRequest('user/authorization', 'POST', request_body)
+
+      if (response.info.status === 'OK' && response.payload.isAuth) {
+        this.$router.push({ name: 'Home', params: {id: response.payload.userData[0]._id} })
+      } else {
+        alert('Логин или пароль не правильные')
+      }
+
+      console.log({response})
+    },
+    sendRequest: async function (path, method, body) {
+      const url = `${this.serverUrl}${path}`
+      const request_config = {
+        method,
+        headers: {
+          'Content-Type': 'application/json;charset=utf-8'
+        },
+        body: null
+      }
+
+      if (method !== 'GET') request_config.body = JSON.stringify(body)
+
+      const response = await fetch (url, request_config)
+
+      return await response.json()
     }
   }
 }
